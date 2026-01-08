@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/szykes/go-unit-test/errorc"
+	"github.com/szykes/go-unit-test/testx"
 	"github.com/szykes/go-unit-test/user"
 )
 
@@ -79,7 +80,7 @@ func TestUserByID(t *testing.T) {
 			gotUser, gotErr := sut.UserByID(ctx, tc.arg.userID)
 
 			assert.Equal(t, tc.want.user, gotUser, tc.name)
-			assert.ErrorIs(t, gotErr, tc.want.err, tc.name)
+			testx.AssertError(t, tc.want.err, gotErr, tc.name)
 		})
 	}
 }
@@ -143,7 +144,7 @@ func TestListUsers(t *testing.T) {
 			gotUsers, gotErr := sut.ListUsers(ctx)
 
 			assert.Equal(t, tc.want.users, gotUsers, tc.name)
-			assert.ErrorIs(t, gotErr, tc.want.err, tc.name)
+			testx.AssertError(t, tc.want.err, gotErr, tc.name)
 		})
 	}
 }
@@ -235,7 +236,7 @@ func TestUserByEmail(t *testing.T) {
 			gotUser, gotErr := sut.UserByEmail(ctx, tc.arg.email)
 
 			assert.Equal(t, tc.want.user, gotUser, tc.name)
-			assert.ErrorIs(t, gotErr, tc.want.err, tc.name)
+			testx.AssertError(t, tc.want.err, gotErr, tc.name)
 		})
 	}
 }
