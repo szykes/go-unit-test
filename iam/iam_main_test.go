@@ -21,25 +21,25 @@ func TestMain(m *testing.M) {
 	goleak.VerifyTestMain(m)
 }
 
-func bootstrap[TParams any, TWants any](
+func bootstrap[TArg any, TWant any](
 	t *testing.T,
-	param TParams,
-	want TWants,
-	prepare func(ctx context.Context, m *mocks, param TParams, want TWants),
+	arg TArg,
+	want TWant,
+	prepare func(ctx context.Context, m *mocks, param TArg, want TWant),
 ) (context.Context, *iam.IAM) {
 	t.Helper()
 
 	ctrl := gomock.NewController(t)
 	t.Cleanup(ctrl.Finish)
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	m := mocks{
 		idp: mock.NewMockidper(ctrl),
 	}
 
 	if prepare != nil {
-		prepare(ctx, &m, param, want)
+		prepare(ctx, &m, arg, want)
 	}
 
 	sut := iam.NewIAM(m.idp)

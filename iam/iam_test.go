@@ -13,30 +13,30 @@ import (
 func TestUserByID(t *testing.T) {
 	t.Parallel()
 
-	type params struct {
+	type arg struct {
 		userID string
 	}
 
-	type wants struct {
+	type want struct {
 		user *user.User
 		err  error
 	}
 
 	tcs := []struct {
 		name    string
-		param   params
-		prepare func(ctx context.Context, m *mocks, param params, want wants)
-		want    wants
+		arg     arg
+		prepare func(ctx context.Context, m *mocks, arg arg, want want)
+		want    want
 	}{
 		{
 			name: "user has found",
-			param: params{
+			arg: arg{
 				userID: "62f36ff8-5ac9-4b2d-8049-197bdea5a48b",
 			},
-			prepare: func(ctx context.Context, m *mocks, param params, want wants) {
-				m.idp.EXPECT().FetchUser(ctx, param.userID).Return(want.user, nil)
+			prepare: func(ctx context.Context, m *mocks, arg arg, want want) {
+				m.idp.EXPECT().FetchUser(ctx, arg.userID).Return(want.user, nil)
 			},
-			want: wants{
+			want: want{
 				user: &user.User{
 					ID:       "62f36ff8-5ac9-4b2d-8049-197bdea5a48b",
 					Username: "John Doe",
@@ -46,25 +46,25 @@ func TestUserByID(t *testing.T) {
 		},
 		{
 			name: "FetchUser general error",
-			param: params{
+			arg: arg{
 				userID: "62f36ff8-5ac9-4b2d-8049-197bdea5a48b",
 			},
-			prepare: func(ctx context.Context, m *mocks, param params, want wants) {
-				m.idp.EXPECT().FetchUser(ctx, param.userID).Return(nil, want.err)
+			prepare: func(ctx context.Context, m *mocks, arg arg, want want) {
+				m.idp.EXPECT().FetchUser(ctx, arg.userID).Return(nil, want.err)
 			},
-			want: wants{
+			want: want{
 				err: errors.New("failed to get fetch user"),
 			},
 		},
 		{
 			name: "FetchUser user not found error",
-			param: params{
+			arg: arg{
 				userID: "62f36ff8-5ac9-4b2d-8049-197bdea5a48b",
 			},
-			prepare: func(ctx context.Context, m *mocks, param params, want wants) {
-				m.idp.EXPECT().FetchUser(ctx, param.userID).Return(nil, user.ErrUserNotFound)
+			prepare: func(ctx context.Context, m *mocks, arg arg, want want) {
+				m.idp.EXPECT().FetchUser(ctx, arg.userID).Return(nil, user.ErrUserNotFound)
 			},
-			want: wants{
+			want: want{
 				err: errorc.ErrNotFound,
 			},
 		},
@@ -74,9 +74,9 @@ func TestUserByID(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			ctx, sut := bootstrap(t, tc.param, tc.want, tc.prepare)
+			ctx, sut := bootstrap(t, tc.arg, tc.want, tc.prepare)
 
-			gotUser, gotErr := sut.UserByID(ctx, tc.param.userID)
+			gotUser, gotErr := sut.UserByID(ctx, tc.arg.userID)
 
 			assert.Equal(t, tc.want.user, gotUser, tc.name)
 			assert.ErrorIs(t, gotErr, tc.want.err, tc.name)
@@ -87,27 +87,27 @@ func TestUserByID(t *testing.T) {
 func TestListUsers(t *testing.T) {
 	t.Parallel()
 
-	type params struct {
+	type arg struct {
 	}
 
-	type wants struct {
+	type want struct {
 		users []*user.User
 		err   error
 	}
 
 	tcs := []struct {
 		name    string
-		param   params
-		prepare func(ctx context.Context, m *mocks, param params, want wants)
-		want    wants
+		arg     arg
+		prepare func(ctx context.Context, m *mocks, arg arg, want want)
+		want    want
 	}{
 		{
-			name:  "users have found",
-			param: params{},
-			prepare: func(ctx context.Context, m *mocks, param params, want wants) {
+			name: "users have found",
+			arg:  arg{},
+			prepare: func(ctx context.Context, m *mocks, arg arg, want want) {
 				m.idp.EXPECT().ListUsers(ctx).Return(want.users, nil)
 			},
-			want: wants{
+			want: want{
 				users: []*user.User{
 					{
 						ID:       "62f36ff8-5ac9-4b2d-8049-197bdea5a48b",
@@ -123,12 +123,12 @@ func TestListUsers(t *testing.T) {
 			},
 		},
 		{
-			name:  "ListUsers general error",
-			param: params{},
-			prepare: func(ctx context.Context, m *mocks, param params, want wants) {
+			name: "ListUsers general error",
+			arg:  arg{},
+			prepare: func(ctx context.Context, m *mocks, arg arg, want want) {
 				m.idp.EXPECT().ListUsers(ctx).Return(nil, want.err)
 			},
-			want: wants{
+			want: want{
 				err: errors.New("failed to list users"),
 			},
 		},
@@ -138,7 +138,7 @@ func TestListUsers(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			ctx, sut := bootstrap(t, tc.param, tc.want, tc.prepare)
+			ctx, sut := bootstrap(t, tc.arg, tc.want, tc.prepare)
 
 			gotUsers, gotErr := sut.ListUsers(ctx)
 
@@ -151,27 +151,27 @@ func TestListUsers(t *testing.T) {
 func TestUserByEmail(t *testing.T) {
 	t.Parallel()
 
-	type params struct {
+	type arg struct {
 		email string
 	}
 
-	type wants struct {
+	type want struct {
 		user *user.User
 		err  error
 	}
 
 	tcs := []struct {
 		name    string
-		param   params
-		prepare func(ctx context.Context, m *mocks, param params, want wants)
-		want    wants
+		arg     arg
+		prepare func(ctx context.Context, m *mocks, arg arg, want want)
+		want    want
 	}{
 		{
 			name: "user has found",
-			param: params{
+			arg: arg{
 				email: "jane@smith.com",
 			},
-			prepare: func(ctx context.Context, m *mocks, param params, want wants) {
+			prepare: func(ctx context.Context, m *mocks, arg arg, want want) {
 				users := []*user.User{
 					{
 						ID:       "62f36ff8-5ac9-4b2d-8049-197bdea5a48b",
@@ -182,7 +182,7 @@ func TestUserByEmail(t *testing.T) {
 				}
 				ListUsers_Succeeds(ctx, users, m.idp)
 			},
-			want: wants{
+			want: want{
 				user: &user.User{
 					ID:       "481fa333-9b6d-4a6d-b4fd-da95535ed436",
 					Username: "Jane Smith",
@@ -192,10 +192,10 @@ func TestUserByEmail(t *testing.T) {
 		},
 		{
 			name: "user has NOT found",
-			param: params{
+			arg: arg{
 				email: "eef485ab-483b-4a56-81ae-99e8e60075c6",
 			},
-			prepare: func(ctx context.Context, m *mocks, param params, want wants) {
+			prepare: func(ctx context.Context, m *mocks, arg arg, want want) {
 				users := []*user.User{
 					{
 						ID:       "62f36ff8-5ac9-4b2d-8049-197bdea5a48b",
@@ -210,17 +210,17 @@ func TestUserByEmail(t *testing.T) {
 				}
 				ListUsers_Succeeds(ctx, users, m.idp)
 			},
-			want: wants{
+			want: want{
 				err: errorc.ErrNotFound,
 			},
 		},
 		{
-			name:  "ListUsers general error",
-			param: params{},
-			prepare: func(ctx context.Context, m *mocks, param params, want wants) {
+			name: "ListUsers general error",
+			arg:  arg{},
+			prepare: func(ctx context.Context, m *mocks, arg arg, want want) {
 				ListUsers_Fails(ctx, want.err, m.idp)
 			},
-			want: wants{
+			want: want{
 				err: errors.New("failed to list users"),
 			},
 		},
@@ -230,9 +230,9 @@ func TestUserByEmail(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			ctx, sut := bootstrap(t, tc.param, tc.want, tc.prepare)
+			ctx, sut := bootstrap(t, tc.arg, tc.want, tc.prepare)
 
-			gotUser, gotErr := sut.UserByEmail(ctx, tc.param.email)
+			gotUser, gotErr := sut.UserByEmail(ctx, tc.arg.email)
 
 			assert.Equal(t, tc.want.user, gotUser, tc.name)
 			assert.ErrorIs(t, gotErr, tc.want.err, tc.name)
