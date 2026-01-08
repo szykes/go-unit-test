@@ -11,7 +11,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-//go:generate go run go.uber.org/mock/mockgen -destination=mock/mock.go -package=mock . idper
+//go:generate go run go.uber.org/mock/mockgen -destination=mock/iam_mock.go -package=mock . idper
 
 type mocks struct {
 	idp *mock.Mockidper
