@@ -9,16 +9,16 @@ import (
 	"github.com/szykes/go-unit-test/user"
 )
 
-type idper interface {
+type identityProvider interface {
 	FetchUser(ctx context.Context, userID string) (*user.User, error)
 	ListUsers(ctx context.Context) ([]*user.User, error)
 }
 
 type IAM struct {
-	idp idper
+	idp identityProvider
 }
 
-func NewIAM(idp idper) *IAM {
+func NewIAM(idp identityProvider) *IAM {
 	return &IAM{
 		idp: idp,
 	}

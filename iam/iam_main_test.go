@@ -11,10 +11,10 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-//go:generate go run go.uber.org/mock/mockgen -destination=mock/iam_mock.go -package=mock . idper
+//go:generate go run go.uber.org/mock/mockgen -destination=mock/iam_mock.go -package=mock . identityProvider
 
 type mocks struct {
-	idp *mock.Mockidper
+	idp *mock.MockidentityProvider
 }
 
 func TestMain(m *testing.M) {
@@ -35,7 +35,7 @@ func bootstrap[TArg any, TWant any](
 	ctx := t.Context()
 
 	m := mocks{
-		idp: mock.NewMockidper(ctrl),
+		idp: mock.NewMockidentityProvider(ctrl),
 	}
 
 	if prepare != nil {
@@ -47,10 +47,10 @@ func bootstrap[TArg any, TWant any](
 	return ctx, sut
 }
 
-func ListUsers_Succeeds(paramCtx context.Context, wantUsers []*user.User, idp *mock.Mockidper) {
+func ListUsers_Succeeds(paramCtx context.Context, wantUsers []*user.User, idp *mock.MockidentityProvider) {
 	idp.EXPECT().ListUsers(paramCtx).Return(wantUsers, nil)
 }
 
-func ListUsers_Fails(paramCtx context.Context, wantErr error, idp *mock.Mockidper) {
+func ListUsers_Fails(paramCtx context.Context, wantErr error, idp *mock.MockidentityProvider) {
 	idp.EXPECT().ListUsers(paramCtx).Return(nil, wantErr)
 }
