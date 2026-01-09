@@ -155,7 +155,7 @@ func TestUserByID(t *testing.T) {
 
 ### 5. Misc
 
-### 5.1 Matcher for gomock
+#### 5.1 Matcher for gomock
 
 Matchers shall live in Main Test File.
 
