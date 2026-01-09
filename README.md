@@ -1,4 +1,4 @@
-# Efficient Go Unit Test Structure
+# Scalable Go Unit Test Structure
 
 This isn't "yet another tutorial" about why unit testing is good or what Table-Driven Testing is. This is about **how you structure your unit test code efficiently**.
 
