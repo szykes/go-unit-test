@@ -18,6 +18,7 @@ When I turned to Go, I faced the same issues. I couldn't find a structure online
 * **Table-Driven Testing:** Always use it. Even if you have few test cases now, you don't know when you will need more.
 * **Black Box Testing:** Test only the exported functions. Whitebox testing locks the internal structure of the unit and makes refactoring hard.
 * **Copy-Paste:** Use the provided files as a template. Not much needs to change to fit your code.
+* **Use `testify` for asserting/requiring and `gomock` for mocking:** I have done a comparison among the available frameworks. I found the combination of `testify` and `gomock` gives the best control over setting assertions and expectations, and they log in an understandable way.
 
 ### 2. File Structure
 
@@ -150,4 +151,66 @@ func TestUserByID(t *testing.T) {
 		})
 	}
 }
+```
+
+### 5. Misc
+
+### 5.1 Matcher for gomock
+
+Matchers shall live in Main Test File.
+
+Strongly recommended to add `recovery` to `Matches()` because a `panic` happens the mocking framework will just swallow and there won't be any useful log about the panic.
+
+```go
+type userMatcher struct {
+	want user.User
+}
+
+func (m userMatcher) Matches(x any) bool {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintf(os.Stderr, "%v\n\n", r)
+			debug.PrintStack()
+		}
+	}()
+
+	got, ok := x.(*user.User)
+	if !ok {
+		return false
+	}
+
+	diff := cmp.Diff(m.want, *got)
+	if diff != "" {
+		return false
+	}
+
+	return true
+}
+
+// This shows what we WANTED
+func (m userMatcher) String() string {
+	return fmt.Sprintf("%+v", m.want)
+}
+
+// This shows what we actually GOT
+func (m userMatcher) Got(x any) string {
+	got, ok := x.(*user.User)
+	if !ok {
+		return fmt.Sprintf("is not a *user.User (type %T)", x)
+	}
+
+	if got == nil {
+		return "nil"
+	}
+
+	return fmt.Sprintf("%+v", *got)
+}
+
+func UserMatches(u user.User) gomock.Matcher {
+	return userMatcher{want: u}
+}
+
+...
+
+m.db.EXPECT().User(ctx, UserMatches(user.User{...})).Return(...)
 ```
