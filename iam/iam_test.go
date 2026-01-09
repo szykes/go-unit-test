@@ -20,7 +20,7 @@ func TestUserByID(t *testing.T) {
 
 	type want struct {
 		user *user.User
-		err  error
+		err  any
 	}
 
 	tcs := []struct {
@@ -93,7 +93,7 @@ func TestListUsers(t *testing.T) {
 
 	type want struct {
 		users []*user.User
-		err   error
+		err   any
 	}
 
 	tcs := []struct {
@@ -158,7 +158,7 @@ func TestUserByEmail(t *testing.T) {
 
 	type want struct {
 		user *user.User
-		err  error
+		err  any
 	}
 
 	tcs := []struct {
@@ -219,7 +219,7 @@ func TestUserByEmail(t *testing.T) {
 			name: "ListUsers general error",
 			arg:  arg{},
 			prepare: func(ctx context.Context, m *mocks, arg arg, want want) {
-				ListUsers_Fails(ctx, want.err, m.idp)
+				ListUsers_Fails(ctx, want.err.(error), m.idp)
 			},
 			want: want{
 				err: errors.New("failed to list users"),
