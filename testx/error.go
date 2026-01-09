@@ -7,6 +7,8 @@ import (
 )
 
 func AssertError(t *testing.T, expectedErr any, gotErr error, tcName string) {
+	t.Helper()
+
 	switch wantErr := expectedErr.(type) {
 	case nil:
 		assert.NoError(t, gotErr, tcName)
