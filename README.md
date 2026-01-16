@@ -210,7 +210,63 @@ func TestUserByID(t *testing.T) {
 }
 ```
 
-#### 5.2 Matcher for gomock
+#### 5.2 Unit Requiring Non-Mock Parameters
+
+If the unit's `New` function requires non-mock objects (e.g., a `config.Config` struct), add it to the `bootstrap` signature and the `tc` struct.
+
+**Update `bootstrap`:**
+
+```go
+func bootstrap[TArg any, TWant any](
+    t *testing.T,
+    cfg config.Config, // Change: Add non-mock parameters here
+    arg TArg,
+    want TWant,
+    prepare func(ctx context.Context, m *mocks, param TArg, want TWant),
+) (context.Context, *iam.IAM) {
+    // ... (logic remains same)
+
+    // Change: Pass the non-mock object to the constructor
+    sut := iam.NewIAM(m.idp, cfg)
+
+    return ctx, sut
+}
+```
+
+**Update Test Cases:**
+
+```go
+func TestUserByID(t *testing.T) {
+    // ...
+    tcs := []struct {
+        name    string
+        cfg     config.Config // Change: Add to test case definition
+        arg     arg
+        prepare func(ctx context.Context, m *mocks, arg arg, want want)
+        want    want
+    }{
+        {
+            name: "user has found",
+            cfg:  config.Config{Timeout: 5}, // Define per test case
+            arg:  arg{ userID: "123" },
+            // ...
+        },
+    }
+
+    for _, tc := range tcs {
+        t.Run(tc.name, func(t *testing.T) {
+            t.Parallel()
+
+            // Change: Pass cfg from tc to bootstrap
+            ctx, sut := bootstrap(t, tc.cfg, tc.arg, tc.want, tc.prepare)
+
+            // ...
+        })
+    }
+}
+```
+
+#### 5.3 Matcher for gomock
 
 Matchers shall live in Main Test File.
 
