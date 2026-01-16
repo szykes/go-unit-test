@@ -157,7 +157,60 @@ func TestUserByID(t *testing.T) {
 
 ### 5. Misc
 
-#### 5.1 Matcher for gomock
+#### 5.1 Context with Data
+
+If the unit relies on values in `context.Context` (e.g., auth tokens), adjust the `prepare` function to return `context.Context`.
+
+**Update `bootstrap`:**
+
+```go
+func bootstrap[TArg any, TWant any](
+    // ...
+    // Change: prepare now returns context.Context
+    prepare func(ctx context.Context, m *mocks, param TArg, want TWant) context.Context,
+) (context.Context, *iam.IAM) {
+    // ...
+    ctx := t.Context()
+    // ...
+
+    if prepare != nil {
+        // Change: update ctx with the result
+        ctx = prepare(ctx, &m, arg, want)
+    }
+
+    // ...
+    return ctx, sut
+}
+```
+
+**Update Test Cases:**
+
+```go
+func TestUserByID(t *testing.T) {
+    // ...
+    tcs := []struct {
+        // ...
+        // Change: update signature
+        prepare func(ctx context.Context, m *mocks, arg arg, want want) context.Context
+        // ...
+    }{
+        {
+            // ...
+            prepare: func(ctx context.Context, m *mocks, arg arg, want want) context.Context {
+                // Add data to context
+                ctx = context.WithValue(ctx, "token", "12345")
+
+                m.idp.EXPECT().FetchUser(ctx, arg.userID).Return(want.user, nil)
+
+                return ctx
+            },
+        },
+    }
+    // ...
+}
+```
+
+#### 5.2 Matcher for gomock
 
 Matchers shall live in Main Test File.
 
