@@ -61,6 +61,8 @@ func bootstrap[TArg any, TWant any](
 	want TWant,
 	prepare func(ctx context.Context, m *mocks, param TArg, want TWant),
 ) (context.Context, *iam.IAM) {
+	defer recoverx.CatchPanicAndDebugPrint()
+
 	t.Helper()
 
 	ctrl := gomock.NewController(t)
@@ -167,12 +169,7 @@ type userMatcher struct {
 }
 
 func (m userMatcher) Matches(x any) bool {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Fprintf(os.Stderr, "%v\n\n", r)
-			debug.PrintStack()
-		}
-	}()
+	defer recoverx.CatchPanicAndDebugPrint()
 
 	got, ok := x.(*user.User)
 	if !ok {
@@ -189,11 +186,15 @@ func (m userMatcher) Matches(x any) bool {
 
 // This shows what we WANTED
 func (m userMatcher) String() string {
+	defer recoverx.CatchPanicAndDebugPrint()
+
 	return fmt.Sprintf("%+v", m.want)
 }
 
 // This shows what we actually GOT
 func (m userMatcher) Got(x any) string {
+	defer recoverx.CatchPanicAndDebugPrint()
+
 	got, ok := x.(*user.User)
 	if !ok {
 		return fmt.Sprintf("is not a *user.User (type %T)", x)

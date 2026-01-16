@@ -6,6 +6,7 @@ import (
 
 	"github.com/szykes/go-unit-test/iam"
 	"github.com/szykes/go-unit-test/iam/mock"
+	"github.com/szykes/go-unit-test/recoverx"
 	"github.com/szykes/go-unit-test/user"
 	"go.uber.org/goleak"
 	"go.uber.org/mock/gomock"
@@ -27,6 +28,8 @@ func bootstrap[TArg any, TWant any](
 	want TWant,
 	prepare func(ctx context.Context, m *mocks, param TArg, want TWant),
 ) (context.Context, *iam.IAM) {
+	defer recoverx.CatchPanicAndDebugPrint()
+
 	t.Helper()
 
 	ctrl := gomock.NewController(t)
